@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${appName} + ' — Dashboard'">DevOps Demo — Dashboard</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f1117;
+            --surface:   #1a1d27;
+            --border:    #2a2d3e;
+            --accent:    #6c63ff;
+            --accent2:   #00d4aa;
+            --danger:    #ff4757;
+            --warn:      #ffa502;
+            --text:      #e2e8f0;
+            --muted:     #8892a4;
+            --radius:    14px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── Sidebar ── */
+        aside {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 28px 20px;
+            gap: 8px;
+            position: sticky;
+            top: 0;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text { font-size: 16px; font-weight: 700; letter-spacing: .3px; }
+        .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+        nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 10px;
+            color: var(--muted); text-decoration: none;
+            font-size: 14px; font-weight: 500;
+            transition: background .15s, color .15s;
+        }
+        nav a.active, nav a:hover { background: rgba(108,99,255,.15); color: var(--text); }
+        nav a.active { color: var(--accent); }
+        nav a span.icon { font-size: 17px; width: 22px; text-align: center; }
+
+        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+        .sidebar-footer p { font-size: 11px; color: var(--muted); text-align: center; }
+
+        /* ── Main ── */
+        main {
+            flex: 1;
+            padding: 36px 40px;
+            overflow-y: auto;
+        }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .page-title { font-size: 26px; font-weight: 700; }
+        .page-title span { color: var(--accent); }
+        .badge {
+            background: rgba(108,99,255,.18); color: var(--accent);
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+
+        /* ── KPI Cards ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 20px;
+            margin-bottom: 36px;
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+        .kpi-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .kpi-card.purple::before { background: linear-gradient(90deg, var(--accent), #a78bfa); }
+        .kpi-card.green::before  { background: linear-gradient(90deg, var(--accent2), #34d399); }
+        .kpi-card.red::before    { background: linear-gradient(90deg, var(--danger), #ff6b81); }
+        .kpi-card.orange::before { background: linear-gradient(90deg, var(--warn), #ffd32a); }
+
+        .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+        .kpi-value { font-size: 38px; font-weight: 800; line-height: 1; }
+        .kpi-value.purple { color: var(--accent); }
+        .kpi-value.green  { color: var(--accent2); }
+        .kpi-value.red    { color: var(--danger); }
+        .kpi-value.orange { color: var(--warn); }
+        .kpi-icon {
+            position: absolute; right: 20px; bottom: 16px;
+            font-size: 36px; opacity: .12;
+        }
+
+        /* ── Success Rate Bar ── */
+        .rate-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin-bottom: 36px;
+        }
+        .rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .rate-header h3 { font-size: 15px; font-weight: 600; }
+        .rate-pct { font-size: 24px; font-weight: 800; color: var(--accent2); }
+        .bar-track {
+            width: 100%; height: 10px;
+            background: var(--border); border-radius: 99px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width 1s ease;
+        }
+        .bar-legend {
+            display: flex; gap: 24px; margin-top: 12px;
+        }
+        .bar-legend span {
+            font-size: 12px; color: var(--muted);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot.success { background: var(--accent2); }
+        .dot.failed  { background: var(--danger); }
+
+        /* ── Activity Table ── */
+        .activity-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .activity-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px; font-weight: 600;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 12px 28px;
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: .6px; color: var(--muted);
+            text-align: left; background: rgba(255,255,255,.02);
+        }
+        tbody tr {
+            border-top: 1px solid var(--border);
+            transition: background .15s;
+        }
+        tbody tr:hover { background: rgba(255,255,255,.03); }
+        tbody td { padding: 14px 28px; font-size: 14px; }
+        .pill {
+            display: inline-block;
+            padding: 3px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; letter-spacing: .4px;
+        }
+        .pill.SUCCESS { background: rgba(0,212,170,.15); color: var(--accent2); }
+        .pill.FAILED  { background: rgba(255,71,87,.15);  color: var(--danger); }
+        .branch-tag {
+            background: rgba(108,99,255,.12);
+            color: var(--accent);
+            padding: 3px 10px; border-radius: 6px;
+            font-size: 12px; font-family: monospace;
+        }
+        .time-cell { color: var(--muted); font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside>
+    <div class="logo">
+        <div class="logo-icon">&#9881;</div>
+        <div>
+            <div class="logo-text" th:text="${appName}">DevOps Demo</div>
+            <div class="logo-sub">CI/CD Dashboard</div>
+        </div>
+    </div>
+    <nav>
+        <a href="/dashboard" class="active">
+            <span class="icon">&#128202;</span> Dashboard
+        </a>
+        <a href="#">
+            <span class="icon">&#128736;</span> Builds
+        </a>
+        <a href="#">
+            <span class="icon">&#128640;</span> Deployments
+        </a>
+        <a href="#">
+            <span class="icon">&#128268;</span> Pipelines
+        </a>
+        <a href="#">
+            <span class="icon">&#128290;</span> Settings
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <p>Updated <span th:text="${lastUpdated}">now</span></p>
+    </div>
+</aside>
+
+<!-- Main content -->
+<main>
+    <div class="topbar">
+        <h1 class="page-title">CI/CD <span>Overview</span></h1>
+        <span class="badge">&#9679;&nbsp; Live</span>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card purple">
+            <div class="kpi-label">Total Builds</div>
+            <div class="kpi-value purple" th:text="${totalBuilds}">142</div>
+            <div class="kpi-icon">&#128736;</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-label">Successful</div>
+            <div class="kpi-value green" th:text="${successBuilds}">128</div>
+            <div class="kpi-icon">&#10004;</div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">Failed</div>
+            <div class="kpi-value red" th:text="${failedBuilds}">14</div>
+            <div class="kpi-icon">&#10008;</div>
+        </div>
+        <div class="kpi-card orange">
+            <div class="kpi-label">Deployments</div>
+            <div class="kpi-value orange" th:text="${deployments}">37</div>
+            <div class="kpi-icon">&#128640;</div>
+        </div>
+    </div>
+
+    <!-- Success Rate -->
+    <div class="rate-card">
+        <div class="rate-header">
+            <h3>Build Success Rate</h3>
+            <span class="rate-pct" th:text="${successRate} + '%'">90%</span>
+        </div>
+        <div class="bar-track">
+            <div class="bar-fill" th:style="'width: ' + ${successRate} + '%'"></div>
+        </div>
+        <div class="bar-legend">
+            <span><span class="dot success"></span> Successful (<span th:text="${successBuilds}">128</span>)</span>
+            <span><span class="dot failed"></span> Failed (<span th:text="${failedBuilds}">14</span>)</span>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-card">
+        <div class="activity-header">Recent Activity</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Status</th>
+                    <th>Branch</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${recentActivity}">
+                    <td th:text="${item.name()}">Build #142</td>
+                    <td>
+                        <span class="pill"
+                              th:classappend="${item.status()}"
+                              th:text="${item.status()}">SUCCESS</span>
+                    </td>
+                    <td><span class="branch-tag" th:text="${item.branch()}">main</span></td>
+                    <td class="time-cell" th:text="${item.time()}">2 min ago</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
