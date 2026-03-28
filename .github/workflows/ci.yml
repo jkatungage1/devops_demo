@@ -22,8 +22,11 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
 
+      - name: Remove local Java home from Gradle properties
+        run: sed -i '/org.gradle.java.home/d' gradle.properties
+
       - name: Build with Gradle
-        run: ./gradlew build -Porg.gradle.java.home=$JAVA_HOME
+        run: ./gradlew build
 
       - name: Build Docker image
         run: docker build -t devops_demo:${{ github.sha }} .
