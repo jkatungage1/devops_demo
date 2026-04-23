@@ -1,1 +1,1 @@
-[![codecov](https://codecov.io/gh/USERNAME/REPO/branch/main/graph/badge.svg)](https://codecov.io/gh/USERNAME/REPO)
+[![codecov](https://codecov.io/gh/jkatungage1/devops_demo/branch/main/graph/badge.svg)](https://codecov.io/gh/jkatungage1/devops_demo)
