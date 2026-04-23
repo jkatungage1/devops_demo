@@ -34,5 +34,16 @@ public class DashboardController {
         return "dashboard";
     }
 
+    @GetMapping({"/", "/hello"})
+    public String dashboard(Model model) {
+        model.addAttribute("appName", "DevOps Demo");
+        model.addAttribute("lastUpdated",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")));
+
+        model.addAttribute("returnMessage", "Hello");
+
+        return "hello";
+    }
+
     public record ActivityItem(String name, String status, String branch, String time) {}
 }
