@@ -35,7 +35,7 @@ public class DashboardController {
     }
 
     @GetMapping({"/", "/hello"})
-    public String dashboard(Model model) {
+    public String hello(Model model) {
         model.addAttribute("appName", "DevOps Demo");
         model.addAttribute("lastUpdated",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")));
