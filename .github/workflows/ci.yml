@@ -27,7 +27,7 @@ jobs:
         run: sed -i '/org.gradle.java.home/d' gradle.properties
 
       - name: Build & test with coverage
-        run: ./gradlew clean test jacocoTestReport
+        run: ./gradlew clean build jacocoTestReport
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -35,8 +35,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
 
-      - name: Build application
-        run: ./gradlew build
+      # - name: Build application
+      #   run: ./gradlew build
 
       - name: Build Docker image
         run: docker build -t devops_demo:${{ github.sha }} .
