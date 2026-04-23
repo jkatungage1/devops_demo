@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches:
-      - '**'
+    branches: ['**']
+
+  pull_request:
 
 jobs:
   build:
@@ -25,8 +26,15 @@ jobs:
       - name: Remove local Java home from Gradle properties
         run: sed -i '/org.gradle.java.home/d' gradle.properties
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build & test with coverage
+        run: ./gradlew clean test jacocoTestReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/jacoco/test/jacocoTestReport.xm
+        # run: ./gradlew build
 
       - name: Build Docker image
         run: docker build -t devops_demo:${{ github.sha }} .
