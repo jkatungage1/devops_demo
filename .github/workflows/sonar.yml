@@ -29,6 +29,6 @@ jobs:
         run: sed -i '/org.gradle.java.home/d' gradle.properties
 
       - name: Build, test & analyze
-        run: ./gradlew clean build jacocoTestReport sonarqube
+        run: ./gradlew clean build jacocoTestReport sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

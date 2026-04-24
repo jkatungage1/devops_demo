@@ -58,7 +58,7 @@ jacocoTestCoverageVerification {
 
 check.dependsOn jacocoTestCoverageVerification
 
-sonarqube {
+sonar {
     properties {
         property "sonar.projectKey", "jkatungage1_devops_demo"
         property "sonar.organization", "jkatungage1"
